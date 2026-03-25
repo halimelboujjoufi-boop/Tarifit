@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="tzm" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tarifiyt AI">
+<meta name="theme-color" content="#d4a843">
+<meta name="description" content="Asisstant zhin s trifiyyt · مساعد ذكي بالأمازيغية الريفية">
+
+<title>ⵜⴰⵔⵉⴼⵉⵢⵜ · Tarifiyt AI</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Apple icons -->
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
+
+:root {
+  --sand: #e8d5b0;
+  --terracotta: #c4622d;
+  --deep: #1a0f00;
+  --gold: #d4a843;
+  --ink: #2c1a0e;
+  --smoke: #f5ede0;
+  --ember: #8b3a1a;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  background: var(--deep);
+  color: var(--sand);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(196,98,45,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(212,168,67,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(139,58,26,0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Install banner */
+#installBanner {
+  display: none;
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--ember), var(--terracotta));
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 30px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  gap: 0.8rem;
+  align-items: center;
+  cursor: pointer;
+  white-space: nowrap;
+  animation: slideUp 0.4s ease;
+}
+
+#installBanner.show { display: flex; }
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+#installBanner button {
+  background: white;
+  color: var(--ember);
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#dismissBanner {
+  background: transparent !important;
+  color: rgba(255,255,255,0.6) !important;
+  font-size: 1rem !important;
+  padding: 0 !important;
+}
+
+/* Offline badge */
+#offlineBadge {
+  display: none;
+  position: fixed;
+  top: calc(var(--safe-top) + 8px);
+  right: 10px;
+  background: var(--ember);
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.06em;
+  z-index: 100;
+}
+
+/* Gold top bar */
+.top-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--ember), var(--gold), var(--terracotta), var(--gold), var(--ember));
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+/* Header */
+header {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  padding: 1rem 1rem 0.8rem;
+  border-bottom: 1px solid rgba(212,168,67,0.15);
+  flex-shrink: 0;
+}
+
+.tifinagh-logo {
+  font-size: 1.8rem;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 20px rgba(212,168,67,0.3);
+  line-height: 1;
+}
+
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--sand);
+  letter-spacing: 0.07em;
+  margin-top: 0.2rem;
+}
+
+header p {
+  font-size: 0.75rem;
+  color: rgba(232,213,176,0.45);
+  font-style: italic;
+  margin-top: 0.1rem;
+}
+
+.scripts-badge {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: rgba(212,168,67,0.1);
+  border: 1px solid rgba(212,168,67,0.25);
+  color: var(--gold);
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  font-family: 'Cinzel', serif;
+}
+
+/* Main */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 5;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.8rem 0.8rem 0;
+  gap: 0.7rem;
+}
+
+/* Script selector */
+.script-selector {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.script-btn {
+  background: rgba(26,15,0,0.7);
+  border: 1px solid rgba(212,168,67,0.2);
+  color: rgba(232,213,176,0.6);
+  padding: 0.4rem 0.9rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  flex: 1;
+  max-width: 120px;
+}
+
+.script-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--deep);
+  font-weight: 700;
+}
+
+/* Chat */
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.5rem 0.2rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ember) transparent;
+}
+
+.chat-container::-webkit-scrollbar { width: 3px; }
+.chat-container::-webkit-scrollbar-thumb { background: var(--ember); border-radius: 2px; }
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  animation: fadeUp 0.3s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message.user { align-items: flex-end; }
+.message.assistant { align-items: flex-start; }
+
+.message-label {
+  font-size: 0.65rem;
+  color: rgba(212,168,67,0.45);
+  letter-spacing: 0.08em;
+  font-family: 'Cinzel', serif;
+  text-transform: uppercase;
+  padding: 0 0.3rem;
+}
+
+.message-bubble {
+  max-width: 88%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 3px;
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.message.user .message-bubble {
+  background: rgba(196,98,45,0.18);
+  border: 1px solid rgba(196,98,45,0.3);
+  color: var(--sand);
+}
+
+.message.assistant .message-bubble {
+  background: rgba(212,168,67,0.07);
+  border: 1px solid rgba(212,168,67,0.18);
+  color: var(--smoke);
+}
+
+.msg-actions {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0 0.2rem;
+}
+
+.play-btn {
+  background: transparent;
+  border: 1px solid rgba(212,168,67,0.25);
+  color: var(--gold);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.play-btn:hover, .play-btn.playing {
+  background: var(--gold);
+  color: var(--deep);
+}
+
+.play-btn.playing { animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+/* Welcome */
+.welcome {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: rgba(232,213,176,0.35);
+}
+
+.welcome .tif-big { font-size: 2rem; color: rgba(212,168,67,0.25); display: block; margin-bottom: 0.5rem; }
+
+/* Quick phrases */
+.quick-phrases {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.chip {
+  background: rgba(212,168,67,0.06);
+  border: 1px solid rgba(212,168,67,0.18);
+  color: rgba(232,213,176,0.6);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.chip:hover { background: rgba(212,168,67,0.14); color: var(--gold); }
+
+/* Input area */
+.input-area {
+  flex-shrink: 0;
+  padding-bottom: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+textarea {
+  flex: 1;
+  background: rgba(26,15,0,0.75);
+  border: 1px solid rgba(212,168,67,0.22);
+  color: var(--sand);
+  padding: 0.75rem 0.9rem;
+  border-radius: 3px;
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: none;
+  min-height: 52px;
+  max-height: 120px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+textarea:focus { border-color: rgba(212,168,67,0.45); }
+textarea::placeholder { color: rgba(232,213,176,0.25); font-style: italic; }
+
+.send-btn {
+  background: linear-gradient(135deg, var(--terracotta), var(--ember));
+  border: none;
+  color: var(--smoke);
+  width: 48px;
+  height: 48px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.send-btn:active { transform: scale(0.95); }
+.send-btn:disabled { opacity: 0.45; }
+
+/* TTS mini bar */
+.tts-bar {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0.5rem 0.6rem;
+  background: rgba(26,15,0,0.5);
+  border: 1px solid rgba(212,168,67,0.1);
+  border-radius: 3px;
+}
+
+.tts-bar label {
+  font-size: 0.72rem;
+  color: rgba(232,213,176,0.45);
+  white-space: nowrap;
+}
+
+select {
+  background: rgba(26,15,0,0.8);
+  border: 1px solid rgba(212,168,67,0.18);
+  color: var(--sand);
+  padding: 0.25rem 0.4rem;
+  border-radius: 2px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.78rem;
+  outline: none;
+  max-width: 140px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 70px;
+  height: 3px;
+  accent-color: var(--gold);
+  background: rgba(212,168,67,0.2);
+  border-radius: 2px;
+  outline: none;
+}
+
+.rec-btn {
+  background: transparent;
+  border: 1px solid rgba(196,98,45,0.35);
+  color: rgba(196,98,45,0.7);
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.rec-btn.recording {
+  background: rgba(196,98,45,0.15);
+  color: var(--terracotta);
+  border-color: var(--terracotta);
+  animation: pulse 1s infinite;
+}
+
+.voice-status {
+  font-size: 0.7rem;
+  color: rgba(212,168,67,0.5);
+  font-style: italic;
+}
+
+/* Loading dots */
+.dots { display: flex; gap: 4px; padding: 0.3rem 0; }
+.dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); opacity: 0.4;
+  animation: db 1.2s infinite;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes db {
+  0%,80%,100% { transform: scale(0.7); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 0.4rem;
+  font-size: 0.62rem;
+  color: rgba(232,213,176,0.18);
+  letter-spacing: 0.07em;
+  border-top: 1px solid rgba(212,168,67,0.06);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+</style>
+</head>
+<body>
+
+<div id="offlineBadge">📵 Offline</div>
+
+<!-- Install Banner -->
+<div id="installBanner">
+  <span>📲 Thebbed s telfun · ثبّت على الهاتف</span>
+  <button id="installBtn">Thebbed · ثبّت</button>
+  <button id="dismissBanner">✕</button>
+</div>
+
+<div class="top-bar"></div>
+
+<header>
+  <div class="tifinagh-logo">ⴰⵎⴻⴷⵢⴰⵣ ⵏ ⵜⴰⵔⵉⴼⵉⵢⵜ</div>
+  <h1>Tarifiyt AI · المساعد الريفي</h1>
+  <p>Mساعد ذكي بالأمازيغية الريفية</p>
+  <div class="scripts-badge">
+    <span class="badge">ⵜⵉⴼⵉⵏⴰⵖ</span>
+    <span class="badge">LATIN</span>
+    <span class="badge">عربي</span>
+    <span class="badge">🔊 TTS</span>
+    <span class="badge" id="pwaStatus">📲 PWA</span>
+  </div>
+</header>
+
+<main>
+  <!-- Script Selector -->
+  <div class="script-selector">
+    <button class="script-btn" onclick="setScript('tifinagh',this)">ⵜⵉⴼⵉⵏⴰⵖ</button>
+    <button class="script-btn active" onclick="setScript('latin',this)">Latin</button>
+    <button class="script-btn" onclick="setScript('arabic',this)">عربي</button>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-container" id="chat">
+    <div class="welcome">
+      <span class="tif-big">ⵣⵣⵓⵍ</span>
+      Azul fellak! · أهلاً بك!<br>
+      <span style="font-size:0.82rem;">Semmed-d awal inu s trifiyyt</span>
+    </div>
+  </div>
+
+  <!-- Quick phrases -->
+  <div class="quick-phrases" id="chips"></div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="inp" placeholder="Semmed-d... · اكتب هنا..." rows="2"
+        onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+    </div>
+
+    <!-- TTS bar -->
+    <div class="tts-bar">
+      <label>🔊</label>
+      <select id="voiceSel"></select>
+      <label>سرعة:</label>
+      <input type="range" id="rate" min="0.5" max="1.5" step="0.1" value="0.85">
+      <span id="rateV" style="font-size:0.7rem;color:var(--gold)">0.85x</span>
+      <button class="rec-btn" id="recBtn" onclick="toggleRec()">⏺ سجّل صوت</button>
+      <input type="file" id="audioUp" accept="audio/*" style="display:none" onchange="handleUpload(event)">
+      <button class="rec-btn" style="border-color:rgba(212,168,67,0.3);color:rgba(232,213,176,0.5);"
+        onclick="document.getElementById('audioUp').click()">⬆ رفع</button>
+      <span class="voice-status" id="vStatus">لا يوجد صوت مستنسخ</span>
+    </div>
+  </div>
+</main>
+
+<footer>ⵜⴰⵔⵉⴼⵉⵢⵜ · Tarifiyt AI v1.0 PWA · ⴰⵎⴰⵣⵉⵖ ⵏ ⴰⵔⵔⵉⴼ</footer>
+
+<script>
+// ===== PWA SETUP =====
+let deferredPrompt = null;
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        console.log('[PWA] Service Worker registered:', reg.scope);
+        document.getElementById('pwaStatus').textContent = '✅ PWA';
+      })
+      .catch(err => console.warn('[PWA] SW failed:', err));
+  });
+}
+
+// Capture install prompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+// Install button
+document.getElementById('installBtn').onclick = async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log('[PWA] Install outcome:', outcome);
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.remove('show');
+};
+
+document.getElementById('dismissBanner').onclick = () => {
+  document.getElementById('installBanner').classList.remove('show');
+};
+
+// Installed detection
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwaStatus').textContent = '✅ مثبّت';
+});
+
+// Offline detection
+window.addEventListener('offline', () => {
+  document.getElementById('offlineBadge').style.display = 'block';
+});
+window.addEventListener('online', () => {
+  document.getElementById('offlineBadge').style.display = 'none';
+});
+
+// ===== STATE =====
+let currentScript = 'latin';
+let isRecording = false;
+let mediaRecorder = null;
+let recordedChunks = [];
+let isSpeaking = false;
+let chatHistory = [];
+
+// ===== SYSTEM PROMPT =====
+const SYSTEM = `Aqqa-k d amedyaz n trifiyyt — Assistant zhin s trifiyyt n Arrif.
+
+You are a warm, knowledgeable AI assistant specialized in Tarifit Amazigh (the Berber language of the Rif region of Morocco). Your mission is to preserve and promote this beautiful language.
+
+LANGUAGE BEHAVIOR:
+- Always respond primarily in Tarifit (trifiyyt)
+- Support all three scripts: Tifinagh (ⵜⵉⴼⵉⵏⴰⵖ), Latin (Tarumit), Arabic script
+- Offer translations when helpful: Tarifit → Arabic → French
+- Be encouraging and patient with learners
+
+TARIFIT KNOWLEDGE:
+Greetings: Azul / Azul fellak (hello) · Arsif (welcome) · Laɛfya (fine/thanks)
+Questions: Mamek tllid? (how are you?) · Mani tlla? (where is?) · Matta? (what?)
+Numbers: Yat, sin, krad, kkuẓ, smmus, sdis, sa, tam, tẓa, mraw
+Culture: Arrif region, northern Morocco, Riffian Berber heritage, traditional music (ahidus), Rif War history
+
+RESPONSE FORMAT:
+1. Answer in Tarifit first
+2. Provide Arabic translation below
+3. Add French if helpful
+4. Always be warm and culturally proud`;
+
+// ===== QUICK PHRASES =====
+const phrases = {
+  latin: [
+    { l: "Azul!", t: "Azul! Mamek tllid?" },
+    { l: "Ameslay", t: "Semmed-d ɣef trifiyyt" },
+    { l: "Arrif", t: "Siweɣ ɣef Arrif" },
+    { l: "Lemlem", t: "Laɛmmer-d awal n trifiyyt" },
+  ],
+  tifinagh: [
+    { l: "ⴰⵣⵓⵍ!", t: "ⴰⵣⵓⵍ! ⵎⴰⵎⴻⴽ ⵜⵍⵍⵉⴷ?" },
+    { l: "ⵜⴰⵎⴰⵣⵉⵖⵜ", t: "ⵙⵉⵡⴻⵖ ⵖⴻⴼ ⵜⴰⵎⴰⵣⵉⵖⵜ" },
+    { l: "ⴰⵔⵔⵉⴼ", t: "ⴰⵔⵔⵉⴼ ⵜⴰⵎⴰⵣⵉⵔⵜ-ⵉⵏⵓ" },
+    { l: "ⵍⴻⵎⵍⴻⵎ", t: "ⵍⴰⵄⵎⵎⴻⵔ-ⴷ ⴰⵡⴰⵍ" },
+  ],
+  arabic: [
+    { l: "مرحبا!", t: "أزول! كيف حالك؟" },
+    { l: "علّمني", t: "علمني التاريفيت" },
+    { l: "الريف", t: "أخبرني عن الريف" },
+    { l: "ترجمة", t: "ترجم هذه الجملة إلى التاريفيت" },
+  ]
+};
+
+// ===== INIT =====
+window.onload = () => {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+  renderChips();
+  document.getElementById('rate').oninput = e =>
+    document.getElementById('rateV').textContent = e.target.value + 'x';
+};
+
+function setScript(s, btn) {
+  currentScript = s;
+  document.querySelectorAll('.script-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChips();
+  const ta = document.getElementById('inp');
+  ta.dir = s === 'arabic' ? 'rtl' : 'ltr';
+  ta.placeholder = s === 'tifinagh' ? 'ⵙⴻⵎⵎⴻⴷ-ⴷ...'
+    : s === 'arabic' ? 'اكتب بالتاريفيت...'
+    : 'Semmed-d... · اكتب هنا...';
+}
+
+function renderChips() {
+  const c = document.getElementById('chips');
+  c.innerHTML = '';
+  phrases[currentScript].forEach(p => {
+    const el = document.createElement('button');
+    el.className = 'chip';
+    el.textContent = p.l;
+    el.onclick = () => document.getElementById('inp').value = p.t;
+    c.appendChild(el);
+  });
+}
+
+// ===== VOICES =====
+function populateVoices() {
+  const sel = document.getElementById('voiceSel');
+  const voices = speechSynthesis.getVoices();
+  sel.innerHTML = '';
+  const preferred = voices.filter(v => v.lang.startsWith('ar') || v.lang.startsWith('fr') || v.lang.startsWith('en'));
+  (preferred.length ? preferred : voices).forEach(v => {
+    const o = document.createElement('option');
+    o.value = voices.indexOf(v);
+    o.textContent = v.name.slice(0, 20) + ' (' + v.lang + ')';
+    sel.appendChild(o);
+  });
+}
+
+// ===== CHAT =====
+async function send() {
+  const inp = document.getElementById('inp');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  document.getElementById('sendBtn').disabled = true;
+  const lid = addLoading();
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: SYSTEM + `\nScript preference: ${currentScript}. Adapt your response script.`,
+        messages: chatHistory
+      })
+    });
+
+    removeLoading(lid);
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || "Ur zmireɣ ara · لم أتمكن من الإجابة.";
+    chatHistory.push({ role: 'assistant', content: reply });
+    addMsg('assistant', reply);
+    speak(reply);
+
+  } catch (err) {
+    removeLoading(lid);
+    addMsg('assistant', '⚠ Tella tɣawsa · خطأ في الاتصال. تأكد من الإنترنت.');
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function addMsg(role, text) {
+  const chat = document.getElementById('chat');
+  chat.querySelector('.welcome')?.remove();
+
+  const msg = document.createElement('div');
+  msg.className = `message ${role}`;
+
+  const lbl = document.createElement('div');
+  lbl.className = 'message-label';
+  lbl.textContent = role === 'user' ? 'Kečč · أنت' : 'ⵣⵉⵏ · المساعد';
+
+  const bub = document.createElement('div');
+  bub.className = 'message-bubble';
+  bub.textContent = text;
+  bub.dir = /[\u0600-\u06FF]/.test(text.slice(0,15)) ? 'rtl' : 'ltr';
+
+  msg.appendChild(lbl);
+  msg.appendChild(bub);
+
+  if (role === 'assistant') {
+    const acts = document.createElement('div');
+    acts.className = 'msg-actions';
+    const pb = document.createElement('button');
+    pb.className = 'play-btn';
+    pb.innerHTML = '▶';
+    pb.title = 'Ssefɣ · استمع';
+    pb.onclick = () => speak(text, pb);
+    acts.appendChild(pb);
+    msg.appendChild(acts);
+  }
+
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addLoading() {
+  const chat = document.getElementById('chat');
+  const id = 'ld-' + Date.now();
+  const msg = document.createElement('div');
+  msg.className = 'message assistant';
+  msg.id = id;
+  const lbl = document.createElement('div');
+  lbl.className = 'message-label';
+  lbl.textContent = 'ⵣⵉⵏ · المساعد';
+  const dots = document.createElement('div');
+  dots.className = 'dots';
+  dots.innerHTML = '<span></span><span></span><span></span>';
+  msg.appendChild(lbl);
+  msg.appendChild(dots);
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+  return id;
+}
+
+function removeLoading(id) {
+  document.getElementById(id)?.remove();
+}
+
+// ===== TTS =====
+function speak(text, btn = null) {
+  if (isSpeaking) {
+    speechSynthesis.cancel();
+    isSpeaking = false;
+    document.querySelectorAll('.play-btn').forEach(b => { b.classList.remove('playing'); b.innerHTML = '▶'; });
+    return;
+  }
+  const utt = new SpeechSynthesisUtterance(text);
+  const voices = speechSynthesis.getVoices();
+  const vi = document.getElementById('voiceSel').value;
+  if (voices[vi]) utt.voice = voices[vi];
+  utt.rate = parseFloat(document.getElementById('rate').value);
+  isSpeaking = true;
+  if (btn) { btn.classList.add('playing'); btn.innerHTML = '⏹'; }
+  utt.onend = utt.onerror = () => {
+    isSpeaking = false;
+    if (btn) { btn.classList.remove('playing'); btn.innerHTML = '▶'; }
+  };
+  speechSynthesis.speak(utt);
+}
+
+// ===== VOICE RECORDING =====
+async function toggleRec() {
+  const btn = document.getElementById('recBtn');
+  const st = document.getElementById('vStatus');
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+        st.textContent = '✓ تم التسجيل (' + Math.round(blob.size/1024) + ' KB)';
+        st.style.color = 'var(--gold)';
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      btn.classList.add('recording');
+      btn.textContent = '⏹ إيقاف';
+      st.textContent = '● جارٍ التسجيل...';
+      st.style.color = 'var(--terracotta)';
+    } catch { st.textContent = '⚠ تعذّر الوصول للميكروفون'; }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    btn.classList.remove('recording');
+    btn.textContent = '⏺ سجّل صوت';
+  }
+}
+
+function handleUpload(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const st = document.getElementById('vStatus');
+  st.textContent = `✓ ${f.name} (${Math.round(f.size/1024)} KB)`;
+  st.style.color = 'var(--gold)';
+}
+</script>
+</body>
+</html>
